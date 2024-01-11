@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Speech Recognition</title>
+</head>
+<body>
+  <h1>Speech Recognition</h1>
+  <p id="output">Transcription will appear here</p>
+
+  <script>
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        const source = audioContext.createMediaStreamSource(stream);
+        const gainNode = audioContext.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'en-US';
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map((result) => result[0].transcript)
+            .join('');
+
+          document.getElementById('output').textContent = transcript;
+        };
+
+        recognition.start();
+      })
+      .catch((error) => {
+        console.error('Error accessing microphone:', error);
+      });
+  </script>
+</body>
+</html>
